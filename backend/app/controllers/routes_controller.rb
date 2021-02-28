@@ -15,7 +15,9 @@ class RoutesController < ApplicationController
     # calculate the travel time between each point using the sailboat transform functions,
     # sum the travel times together and return the total travel time as a response to the frontend
     def create
-        route = Route.new(route_params)
+        puts params
+        route = Route.create(user_id: params["user_id"], coordinates: params["coordinates"])
+        # byebug
         render json: route
     end
 

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Open Layers Test</title>
+   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+    <style>#map {
+        padding: 5vh;
+        width: 600px;
+        height: 600px;
+      }</style>
+  <link rel="stylesheet" href="/frontend.e31bb0bc.css"></head>
+  <body>
+    <div id="map"></div>
+    <div id="mouse-position"></div>
+    <form>
+        <label for="projection">Projection </label>
+        <select id="projection">
+          <option value="EPSG:4326">EPSG:4326</option>
+          <option value="EPSG:3857">EPSG:3857</option>
+        </select>
+        <label for="precision">Precision</label>
+        <input id="precision" type="number" min="0" max="12" value="4">
+      </form>
+      <div class="marker">
+        <ul class="marker__list">
+        </ul>
+      </div>
+    <script src="/frontend.e31bb0bc.js"></script>
+  </body>
+</html>

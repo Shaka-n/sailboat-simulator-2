@@ -19,6 +19,9 @@ import {Vector as VectorSource} from 'ol/source';
 // import {Icon, Style} from 'ol/style';
 // import VectorSource from 'ol/source/Vector';
 
+const ROUTES_ENDPOINT = 'http://localhost:3000/routes'
+const current_user_id = 1
+const headers = { "Accept":"application/json"}
 
   const mousePositionControl = new MousePosition({
     coordinateFormat: createStringXY(4),
@@ -177,20 +180,26 @@ const mapElement = document.querySelector('#map')
 
 document.addEventListener('keyup',(e)=>{
   e.preventDefault()
+  
   if(e.key=="Enter"){
+    const markerList = document.getElementsByClassName('coordinate')
+    const markerElements = Array.from(markerList)
+    const coordinates = markerElements.map( li => li.innerHTML.split(','))
+    const coordinatesInt = coordinates.map(coords => coords.map(coord => parseFloat(coord)))
+    console.log(coordinatesInt)
     map.removeInteraction(lineDrawInteraction)
-    
+
     // sending the route and point information to the backend server
-    // fetch(url,{
-    //   method:'POST',
-    //   mode: 'cors',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Accepts': 'application/json'
-    //   },
-    //   body: JSON.stringify(data)
-    // }).then(response => response.json())
-    // .then(data => console.log(data))
+    fetch(`${ROUTES_ENDPOINT}`,{
+      method:'POST',
+      headers: headers,
+      body: JSON.stringify({
+        coordinates: coordinatesInt,
+        user_id: current_user_id
+      })
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
   }
   
 })
