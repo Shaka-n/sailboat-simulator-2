@@ -66,6 +66,7 @@ GEM
     ffi (1.14.2)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
+    haversine (0.3.2)
     httparty (0.18.1)
       mime-types (~> 3.0)
       multi_xml (>= 0.5.2)
@@ -159,6 +160,7 @@ PLATFORMS
 DEPENDENCIES
   bootsnap (>= 1.4.2)
   byebug
+  haversine (~> 0.3.0)
   httparty
   listen (~> 3.2)
   puma (~> 4.1)

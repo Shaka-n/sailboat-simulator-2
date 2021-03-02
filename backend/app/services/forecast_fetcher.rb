@@ -9,17 +9,18 @@ class ForecastFetcher
     }
 
     def initialize(coordinate)
-        @coordinateX = coordinate[0]
-        @coordinateY = coordinate[1]
+        @coordinateX = coordinate[1].round(4)
+        @coordinateY = coordinate[0].round(4)
     end
 # In order to get the forecast, we need the relavent weather station and grid square. This necessitates two fetches, and is apparently non-negotiable.
 # We can find the appropriate station endpoint using the coordinate point endpoint
     def get_grid_endpoint
         grid = HTTParty.get(
-        "#{@@grid_endpoint}/#{@coordinateX},#{@coordinateY}",
+        "#{@@grid_endpoint}/#{@coordinateX},#{@coordinateY.round(4)}",
         :headers => @@headers
         )
         grid_body = JSON.parse(grid.body)
+        # byebug
         forecast_endpoint = grid_body['properties']['forecast']
     end
     # This part bears some explaining. The forecast is broken up by "periods", whcih is demarcated differently between the current day and the rest of the coming week
