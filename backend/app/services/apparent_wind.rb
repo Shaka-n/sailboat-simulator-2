@@ -47,15 +47,16 @@ class ApparentWind
   #                 of the wind the boat is producing.
   
   def angle
-    equation_1 = @wind_velocity * ETA
+    equation_1 = (@wind_velocity * ETA).to_i
     apparent_wind_agl = @real_wind_agl - 0.0001
 
-    until @variance > equation_1 - 0.001 && @variance < equation_1 + 0.001
+    until @variance > (equation_1) - 0.001 && @variance < (equation_1 ) + 0.001
       equation_2 = sailboat_transform(apparent_wind_agl)
 
       apparent_wind_agl -= 0.00001
       @variance = equation_1 - equation_2
     end
+    # byebug
     puts "Apparent Wind Angle:\n#{apparent_wind_agl}"
     apparent_wind_agl
   end

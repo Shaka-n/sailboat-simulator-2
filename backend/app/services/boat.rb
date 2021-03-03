@@ -1,5 +1,5 @@
-require './numeric_patch'
-require './apparent_wind'
+# require_relative './apparent_wind'
+require_relative '../patches/numeric.rb'
 
 # Boat's primary behavior is to evaluate the velocity given the real wind angle and the
 # wind velocity.
@@ -11,9 +11,10 @@ class Boat
   # @see ApparentWind
 
   def initialize(real_wind_angle, wind_velocity)
-    @wind_velocity = wind_velocity
+    @wind_velocity = wind_velocity.to_i
     @real_wind_agl = reflect_angle_over_180(real_wind_angle).to_radians
     @apparent_wind_agl = ApparentWind.new(@real_wind_agl, @wind_velocity).angle
+
   end
 
   # B = W * (sin(R - A) / sin(A)),
@@ -23,9 +24,13 @@ class Boat
   # @return [Float] boat_velocity (B), The resulting boat velocity.
   
   def velocity
-    @wind_velocity * Math.sin(
+    
+    velocity = @wind_velocity * Math.sin(
       @real_wind_agl - @apparent_wind_agl
     ) / @apparent_wind_agl
+    # byebug
+
+    velocity
   end
 
   private

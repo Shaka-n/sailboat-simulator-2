@@ -39,17 +39,22 @@ class Route < ApplicationRecord
 
     def total_travel_time
         intCoordinates = JSON.parse(self.coordinates)
-        intCoordinates.each_with_index.reduce(0) do |sum_travel_time, (coordinate, index)| 
+        sum_travel_time = 0
+        intCoordinates.each_with_index do |coordinate, index| 
             next_coordinate = intCoordinates[index+1]
             if next_coordinate != nil
-                # byebug
                 distance = Haversine.distance(coordinate[0], coordinate[1], next_coordinate[0], next_coordinate[1]).to_miles
                 wind = ForecastFetcher.new(coordinate).fetch_wind_data
                 # Need to convert wind direction to a degree representation
                 # For now, let's just hard code it
-                boat = Boat.new(self.heading(wind["wind_direction"]),wind["wind_speed"])
-                speed = boat.velocity * distance
+                boat = Boat.new(heading(wind["wind_direction"]),wind["wind_speed"])
+                velocity = boat.velocity
+                travel_time = distance / velocity
+                # byebug
+                sum_travel_time += travel_time
             end
         end
+        # byebug
+        sum_travel_time
     end
 end
