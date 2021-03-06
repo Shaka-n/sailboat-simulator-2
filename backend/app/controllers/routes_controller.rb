@@ -2,10 +2,13 @@ class RoutesController < ApplicationController
 
     def show
         route = Route.find(params[:id])
+        total_travel_time = route.total_travel_time
+        render json: total_travel_time
     end
 
     def index
         routes = Route.all
+        render json: routes
     end
 # This controller action has to do these things: 
     # receive the post request from the frontend,
@@ -15,7 +18,7 @@ class RoutesController < ApplicationController
     # calculate the travel time between each point using the sailboat transform functions,
     # sum the travel times together and return the total travel time as a response to the frontend
     def create
-        route = Route.create!(user_id: params[:user_id], coordinates: params[:coordinates])
+        route = Route.create!(user_id: params[:user_id], coordinates: params[:coordinates], name: params[:name])
         # byebug
         total_travel_time = route.total_travel_time
         puts "Total Travel Time"

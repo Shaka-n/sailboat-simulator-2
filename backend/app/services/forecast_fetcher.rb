@@ -45,6 +45,7 @@ class ForecastFetcher
         week_forecast = JSON.parse(forecast.parsed_response)
         # byebug
         if week_forecast['properties'] == nil
+            puts status_code
             byebug
             puts "week_forecast nil"
         end

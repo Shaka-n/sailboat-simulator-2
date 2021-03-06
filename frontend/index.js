@@ -2,7 +2,7 @@ import 'ol/ol.css';
 import {Map, View} from 'ol';
 import OSM from 'ol/source/OSM';
 import MousePosition from 'ol/control/MousePosition';
-import {createStringXY} from 'ol/coordinate';
+import {add, createStringXY} from 'ol/coordinate';
 import {defaults as defaultControls} from 'ol/control';
 import {fromLonLat, toLonLat} from 'ol/proj';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
@@ -12,16 +12,12 @@ import Draw from 'ol/interaction/Draw';
 import {Icon, Stroke, Style} from 'ol/style';
 import {Vector as VectorSource} from 'ol/source';
 
-// import TileJSON from 'ol/source/TileJSON';
-// import { set } from 'ol/transform';
-// import Feature from 'ol/Feature';
-// import Point from 'ol/geom/Point';
-// import {Icon, Style} from 'ol/style';
-// import VectorSource from 'ol/source/Vector';
-
 const ROUTES_ENDPOINT = 'http://localhost:3000/routes'
 const current_user_id = 1
-const headers = { "Accept":"application/json"}
+const headers = { "Content-Type":"application/json"}
+
+// The following functions track to coordinates of the mouse cursor within the map
+// *******************************************************************************
 
   const mousePositionControl = new MousePosition({
     coordinateFormat: createStringXY(4),
@@ -46,22 +42,45 @@ const headers = { "Accept":"application/json"}
     mousePositionControl.setCoordinateFormat(format);
   });
 
+// This is where the map and interactive layers are initialized
+// ************************************************************
 
+const raster = new TileLayer({
+    source: new OSM(),
+  });
+const source = new VectorSource({wrapX: false});
+
+var vector = new VectorLayer({
+  source: source,
+  style: lineStyleFunction
+});
 
 // Creating the Map object. Settings on the View define defaults for viewing the map as a 2D object
 const map = new Map({
     controls: defaultControls().extend([mousePositionControl]),
     target: 'map',
     layers: [
-        new TileLayer({
-            source: new OSM()
-        })
+        raster,
+        vector
     ],
     view: new View({
         center: fromLonLat([-70.74, 41.82]),
-        zoom: 7
+        zoom: 8
     })
 });
+
+
+// This the interactive line element that gets added to the map
+// ************************************************************
+let draw
+function addlineDrawInteraction(){
+  draw = new Draw({
+    source: source,
+    type: 'LineString',
+  })
+  map.addInteraction(draw);
+}
+addlineDrawInteraction()
 
 
 
@@ -76,6 +95,7 @@ function setMarker(coordString){
   const markerList = document.querySelector(".marker__list")
   console.log(markerList)
   const newMarker = document.createElement('li')
+  newMarker.classList.add('coordinate')
   newMarker.textContent = coordString
   markerList.appendChild(newMarker)
   const coords = convertStringCoordstoArr(coordString)
@@ -84,46 +104,122 @@ function setMarker(coordString){
 
 // This is where things happen after the DOM is finished loading
 document.addEventListener("DOMContentLoaded", ()=>{
-  let customMousePosition = document.getElementsByClassName('custom-mouse-position')
-  const map = document.getElementById('map')
-
+  const customMousePosition = document.getElementsByClassName('custom-mouse-position')
   document.addEventListener("click",  (e) => {
-    console.log(customMousePosition[0].textContent)
-    return setMarker(customMousePosition[0].textContent)
-  } )
+    console.log()
+    if(e.target.tagName == "CANVAS"){
+      console.log(customMousePosition[0].textContent)
+      return setMarker(customMousePosition[0].textContent)
+    }
+  })
   
 });
 
-// Popup showing the position the user clicked
-const popup = new Overlay({
-  element: document.getElementById('popup'),
-});
-map.addOverlay(popup);
+// This will be a function to send the coordinates to the backend
+// **************************************************************
 
-// This is the event handler for when the user clicks the map
-map.on('click', function (evt) {
-  console.log("the map has been clicked")
-  // This part adds the line drawing
+document.addEventListener('keyup',(e)=>{
+  e.preventDefault()
   
-  const coordinate = evt.coordinate;
-  // This part causes a popup to appear listing the coordinates of the spot the user clicked
-  const element = popup.element;
-  const hdms = toStringHDMS(toLonLat(coordinate));
-  $(element).popover('dispose');
-  popup.setPosition(coordinate);
-  $(element).popover({
-    container: element,
-    placement: 'top',
-    animation: false,
-    html: true,
-    content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
-  });
-  $(element).popover('show');
+  if(e.key=="Enter"){
+    const markerList = document.getElementsByClassName('coordinate')
+    const markerElements = Array.from(markerList)
+    const coordinates = markerElements.map( li => li.innerHTML.split(','))
+    console.log("coordinates", coordinates)
+    const coordinatesInt = coordinates.map(coords => coords.map(coord => parseFloat(coord)))
+   map.getInteractions().forEach((interaction) => {
+     if(interaction instanceof Draw){
+       console.log("This is a drawing")
+       interaction.finishDrawing()
+     }
+   })
+   const routeName = document.querySelector(".route-name__field").value
+    console.log("current_user_id", current_user_id)
+    console.log("coordinates", coordinatesInt)
+    console.log(routeName)
+    postCoordinates(coordinatesInt, routeName)
+  }
+  
+})
 
-});
-  // This is where the line drawing will happen
-  
-  // This is a function to style the line between point
+function postCoordinates(coordinatesInt, routeName){
+  fetch(`${ROUTES_ENDPOINT}`,{
+    method:'POST',
+    headers: headers,
+    body: JSON.stringify({
+      coordinates: coordinatesInt,
+      userId: current_user_id,
+      name: routeName
+    })
+  })
+  .then(response => response.json())
+  .then(totalTravelTime => {
+    console.log(totalTravelTime)
+    const travelTimeDisplay = document.querySelector("#travel-time__display")
+    travelTimeDisplay.textContent = totalTravelTime
+  })
+}
+// This function loads the saved routes and loads them into the DOM
+// ****************************************************************
+
+const savedRoutesButton = document.querySelector(".routes__button")
+savedRoutesButton.addEventListener('click', (e)=>{loadSavedRoutes()})
+
+function loadSavedRoutes(){
+  fetch(`${ROUTES_ENDPOINT}`,{
+    method: 'GET',
+    headers: headers
+  })
+  .then(response => response.json())
+  .then(routes =>{
+    console.log(routes)
+    const routesList = document.querySelector(".routes__list")
+
+    routes.map(route =>{
+      const newRoute = document.createElement("li")
+      newRoute.dataset.id = route.id
+      if(route.name){
+        newRoute.textContent = route.name
+        newRoute.addEventListener('click', (e) =>{
+          console.log(e.target.textContent)
+          const routeId = e.target.dataset.id
+          viewSavedRouteTravelTime(routeId)
+        })
+      }
+      else if(route.coordinates){
+        newRoute.textContent = route.coordinates
+        newRoute.addEventListener('click', (e) =>{
+          const stringCoords = e.target.textContent
+          const coordinates = JSON.parse("[" + e.target.textContent + "]")
+          console.log(coordinates)
+
+        })
+      }else{
+        newRoute.textContent = "No Coordinates Saved"
+      }
+      routesList.appendChild(newRoute)
+    })
+  })
+}
+
+// This function will find a route by its name in the backend and calculate
+//  the current travel time based on its coordinates and the current forecast
+// ***************************************************************************
+
+function viewSavedRouteTravelTime(routeId){
+  fetch(`${ROUTES_ENDPOINT}/${routeId}`,{
+    method: 'GET',
+    headers: headers
+  })
+  .then(response => response.json())
+  .then(totalTravelTime => {
+    console.log(totalTravelTime)
+    const travelTimeDisplay = document.querySelector("#travel-time__display")
+    travelTimeDisplay.textContent = totalTravelTime
+  })
+}
+
+// Styling for the LineString
 const lineStyleFunction = (feature) => {
   var geometry = feature.getGeometry();
   var styles = [
@@ -134,7 +230,6 @@ const lineStyleFunction = (feature) => {
         width: 2,
       }),
     }) ];
-
   geometry.forEachSegment(function (start, end) {
     var dx = end[0] - start[0];
     var dy = end[1] - start[1];
@@ -155,57 +250,27 @@ const lineStyleFunction = (feature) => {
 
   return styles;
 };
-// New raster for the line
-const lineRaster = new TileLayer({
-  source: new OSM(),
-});
-// new source for the line
-const lineSource = new VectorSource();
-// new vector fo the line
-const lineVector = new VectorLayer({
-  source: lineSource,
-  style: lineStyleFunction,
-});
-
-// This the interactive element that gets added to the map
-const lineDrawInteraction = new Draw({
-    source: lineSource,
-    type: 'LineString',
-  })
-  map.addInteraction(lineDrawInteraction);
-
-// This will be a function to stop drawing the line
-
-const mapElement = document.querySelector('#map')
-
-document.addEventListener('keyup',(e)=>{
-  e.preventDefault()
-  
-  if(e.key=="Enter"){
-    const markerList = document.getElementsByClassName('coordinate')
-    const markerElements = Array.from(markerList)
-    const coordinates = markerElements.map( li => li.innerHTML.split(','))
-    const coordinatesInt = coordinates.map(coords => coords.map(coord => parseFloat(coord)))
-    console.log(coordinatesInt)
-    map.removeInteraction(lineDrawInteraction)
-
-    // sending the route and point information to the backend server
-    fetch(`${ROUTES_ENDPOINT}`,{
-      method:'POST',
-      headers: headers,
-      body: JSON.stringify({
-        coordinates: coordinatesInt,
-        user_id: current_user_id
-      })
-    })
-    .then(response => response.json())
-    .then(data => console.log(data))
-  }
-  
-})
 
 
 // This is extra code I tried to use to make new markers using Icons. might be easier to do this with Ovelays instead
+  // Popup showing the position the user clicked
+  // const popup = new Overlay({
+  //   element: document.getElementById('popup'),
+  // });
+  // map.addOverlay(popup);
+  // This part causes a popup to appear listing the coordinates of the spot the user clicked
+  // const element = popup.element;
+  // const hdms = toStringHDMS(toLonLat(coordinate));
+  // $(element).popover('dispose');
+  // popup.setPosition(coordinate);
+  // $(element).popover({
+  //   container: element,
+  //   placement: 'top',
+  //   animation: false,
+  //   html: true,
+  //   content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
+  // });
+  // $(element).popover('show');
 
 // const newMarkerFeature = new Feature({
 //   geometry: new Point([0,0]),

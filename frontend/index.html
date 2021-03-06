@@ -15,8 +15,15 @@
     </style>
   </head>
   <body>
-    <div id="map"></div>
+    <div id="map-container">
+      <div id="map"></div>
+    </div>
+    <div id="travel-time"><h3>Total Travel Time</h3><h4 id="travel-time__display"></h4></div>
     <div id="mouse-position"></div>
+    <form class="route-name">
+      <label>Route Name</label>
+      <input class="route-name__field" type="text">
+    </form>
     <form>
         <label for="projection">Projection </label>
         <select id="projection">
@@ -28,6 +35,12 @@
       </form>
       <div class="marker">
         <ul class="marker__list">
+        </ul>
+      </div>
+      
+      <div class="routes">
+        <button class="routes__button">Load Saved Routes</button>
+        <ul class ="routes__list">
         </ul>
       </div>
     <script src="./index.js"></script>

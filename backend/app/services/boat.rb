@@ -14,7 +14,8 @@ class Boat
     @wind_velocity = wind_velocity.to_i
     @real_wind_agl = reflect_angle_over_180(real_wind_angle).to_radians
     @apparent_wind_agl = ApparentWind.new(@real_wind_agl, @wind_velocity).angle
-
+    # byebug
+    puts "checking boat initialize"
   end
 
   # B = W * (sin(R - A) / sin(A)),
@@ -27,10 +28,10 @@ class Boat
     
     velocity = @wind_velocity * Math.sin(
       @real_wind_agl - @apparent_wind_agl
-    ) / @apparent_wind_agl
+    ) / @apparent_wind_agl 
     # byebug
 
-    velocity
+    velocity * 0.5
   end
 
   private

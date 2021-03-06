@@ -12,7 +12,7 @@ class Route < ApplicationRecord
     # when loop is over, return the total travel time
     def heading(wind_direction)
         degrees={
-            "E"=>0,
+            "E"=>1,
             "NE"=> 45,
             "N"=>90,
             "NW"=> 135,
@@ -22,17 +22,27 @@ class Route < ApplicationRecord
             "SE"=>315
         }
         degrees[wind_direction]
-        # cX1 = coordinates1[0]
-        # cY1 = coordinates1[1]
-        # cX2 = coordinates2[0]
-        # cY2 = coordinates2[1]
-        # # if the first Y is less than the second Y, we're going North
-        # if(cY1 < cY2)
-        #     # If the first X is less than the second X, we;re going  West
-        #     if(cX1<cx2)
-        # # if the first Y is greater than the second Y, we're going South
-        # else
-        # end
+
+    end
+    
+    def boat_heading(coordinate, next_coordinate)
+        if coordinate[0] > next_coordinate[0]
+            boat_heading = "E"
+            if coordinate[1] > next_coordinate[1]
+                boat_heading = "SE"
+            else
+                boat_heading = "NE"
+            end
+        else
+            boat_heading = "W"
+            if coordinate[1] > next_coordinate[1]
+                boat_heading = "SE"
+            else
+                boat_heading = "NE"
+            end
+        end
+
+        adjusted_heading = heading(boat_heading)
     end
 
 
@@ -47,10 +57,11 @@ class Route < ApplicationRecord
                 wind = ForecastFetcher.new(coordinate).fetch_wind_data
                 # Need to convert wind direction to a degree representation
                 # For now, let's just hard code it
-                boat = Boat.new(heading(wind["wind_direction"]),wind["wind_speed"])
+                adjusted_wind_angle = heading(wind["wind_direction"]) - boat_heading(coordinate, next_coordinate)
+                boat = Boat.new(adjusted_wind_angle.abs, wind["wind_speed"])
                 velocity = boat.velocity
-                travel_time = distance / velocity
                 # byebug
+                travel_time = distance / velocity
                 sum_travel_time += travel_time
             end
         end

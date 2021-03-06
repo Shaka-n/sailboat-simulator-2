@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_27_231214) do
+ActiveRecord::Schema.define(version: 2021_03_06_223503) do
 
   create_table "routes", force: :cascade do |t|
     t.string "coordinates"
     t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "name"
     t.index ["user_id"], name: "index_routes_on_user_id"
   end
 
