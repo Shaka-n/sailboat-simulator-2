@@ -44,3 +44,5 @@ gem 'rack-cors'
 gem 'yard', '~> 0.8.7.6'
 gem "httparty"
 gem 'haversine', '~> 0.3.0'
+
+gem 'concurrent-ruby', require: 'concurrent'

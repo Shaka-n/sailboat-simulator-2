@@ -1,4 +1,6 @@
 require 'haversine'
+require 'concurrent'
+
 class Route < ApplicationRecord
     belongs_to :user, optional: true
 
@@ -47,25 +49,51 @@ class Route < ApplicationRecord
 
 
 
+    # def total_travel_time
+    #     intCoordinates = JSON.parse(self.coordinates)
+    #     sum_travel_time = 0
+    #     intCoordinates.each_with_index do |coordinate, index| 
+    #         next_coordinate = intCoordinates[index+1]
+    #         if next_coordinate != nil
+    #             distance = Haversine.distance(coordinate[0], coordinate[1], next_coordinate[0], next_coordinate[1]).to_miles
+    #             wind = ForecastFetcher.new(coordinate).fetch_wind_data
+    #             # Need to convert wind direction to a degree representation
+    #             # For now, let's just hard code it
+    #             adjusted_wind_angle = heading(wind["wind_direction"]) - boat_heading(coordinate, next_coordinate)
+    #             boat = Boat.new(adjusted_wind_angle.abs, wind["wind_speed"])
+    #             velocity = boat.velocity
+    #             # byebug
+    #             travel_time = distance / velocity
+    #             sum_travel_time += travel_time
+    #         end
+    #     end
+    #     # byebug
+    #     sum_travel_time
+    # end
+
     def total_travel_time
-        intCoordinates = JSON.parse(self.coordinates)
+        coordinates = JSON.parse(self.coordinates)
         sum_travel_time = 0
-        intCoordinates.each_with_index do |coordinate, index| 
-            next_coordinate = intCoordinates[index+1]
+        array = []
+        coordinates.each_with_index do |coordinate_pair, index| 
+            array << Concurrent::Promises.future(coordinate_pair) do |coordinate_pair|
+                ForecastFetcher.new(coordinate_pair).fetch_wind_data 
+            end
+        end
+
+        coordinates.each_with_index do |coordinate, index| 
+            next_coordinate = coordinates[index+1]
             if next_coordinate != nil
                 distance = Haversine.distance(coordinate[0], coordinate[1], next_coordinate[0], next_coordinate[1]).to_miles
-                wind = ForecastFetcher.new(coordinate).fetch_wind_data
-                # Need to convert wind direction to a degree representation
-                # For now, let's just hard code it
+                wind = array[index].value
                 adjusted_wind_angle = heading(wind["wind_direction"]) - boat_heading(coordinate, next_coordinate)
                 boat = Boat.new(adjusted_wind_angle.abs, wind["wind_speed"])
                 velocity = boat.velocity
-                # byebug
                 travel_time = distance / velocity
                 sum_travel_time += travel_time
+
             end
         end
-        # byebug
         sum_travel_time
     end
 end

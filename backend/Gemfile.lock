@@ -63,7 +63,7 @@ GEM
     concurrent-ruby (1.1.8)
     crass (1.0.6)
     erubi (1.10.0)
-    ffi (1.14.2)
+    ffi (1.15.0)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     haversine (0.3.2)
@@ -91,7 +91,7 @@ GEM
     minitest (5.14.4)
     msgpack (1.4.2)
     multi_xml (0.6.0)
-    nio4r (2.5.5)
+    nio4r (2.5.7)
     nokogiri (1.11.1-x86_64-darwin)
       racc (~> 1.4)
     puma (4.3.7)
@@ -160,6 +160,7 @@ PLATFORMS
 DEPENDENCIES
   bootsnap (>= 1.4.2)
   byebug
+  concurrent-ruby
   haversine (~> 0.3.0)
   httparty
   listen (~> 3.2)
