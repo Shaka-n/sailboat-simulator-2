@@ -156,7 +156,9 @@ function postCoordinates(coordinatesInt, routeName){
   .then(totalTravelTime => {
     console.log(totalTravelTime)
     const travelTimeDisplay = document.querySelector("#travel-time__display")
-    travelTimeDisplay.textContent = totalTravelTime
+    const convertedTime = timeConversion(totalTravelTime)
+    travelTimeDisplay.textContent = `${convertedTime["hours"]} hours, ${convertedTime["minutes"]} minutes, and ${convertedTime["seconds"]} seconds`
+
   })
 }
 // This function loads the saved routes and loads them into the DOM
@@ -215,8 +217,22 @@ function viewSavedRouteTravelTime(routeId){
   .then(totalTravelTime => {
     console.log(totalTravelTime)
     const travelTimeDisplay = document.querySelector("#travel-time__display")
-    travelTimeDisplay.textContent = totalTravelTime
+    const convertedTime = timeConversion(totalTravelTime)
+    travelTimeDisplay.textContent = `${convertedTime["hours"]} hours, ${convertedTime["minutes"]} minutes, and ${convertedTime["seconds"]} seconds`
   })
+}
+
+// Method for converting from decimal time to normal time
+
+function timeConversion(num){
+  let decimalTime = num * 60 * 60
+  const hours = Math.floor((decimalTime / (60 * 60)))
+  decimalTime - (hours * 60 * 60)
+  const minutes = Math.floor((decimalTime / 60))
+  decimalTime = decimalTime - (minutes * 60)
+  const seconds = Math.round(decimalTime)
+
+  return {"hours": hours, "minutes": minutes, "seconds": seconds}
 }
 
 // Styling for the LineString

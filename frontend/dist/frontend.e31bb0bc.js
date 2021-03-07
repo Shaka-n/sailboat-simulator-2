@@ -94719,7 +94719,8 @@ function postCoordinates(coordinatesInt, routeName) {
   }).then(function (totalTravelTime) {
     console.log(totalTravelTime);
     var travelTimeDisplay = document.querySelector("#travel-time__display");
-    travelTimeDisplay.textContent = totalTravelTime;
+    var convertedTime = timeConversion(totalTravelTime);
+    travelTimeDisplay.textContent = "".concat(convertedTime["hours"], " hours, ").concat(convertedTime["minutes"], " minutes, and ").concat(convertedTime["seconds"], " seconds");
   });
 } // This function loads the saved routes and loads them into the DOM
 // ****************************************************************
@@ -94778,8 +94779,24 @@ function viewSavedRouteTravelTime(routeId) {
   }).then(function (totalTravelTime) {
     console.log(totalTravelTime);
     var travelTimeDisplay = document.querySelector("#travel-time__display");
-    travelTimeDisplay.textContent = totalTravelTime;
+    var convertedTime = timeConversion(totalTravelTime);
+    travelTimeDisplay.textContent = "".concat(convertedTime["hours"], " hours, ").concat(convertedTime["minutes"], " minutes, and ").concat(convertedTime["seconds"], " seconds");
   });
+} // Method for converting from decimal time to normal time
+
+
+function timeConversion(num) {
+  var decimalTime = num * 60 * 60;
+  var hours = Math.floor(decimalTime / (60 * 60));
+  decimalTime - hours * 60 * 60;
+  var minutes = Math.floor(decimalTime / 60);
+  decimalTime = decimalTime - minutes * 60;
+  var seconds = Math.round(decimalTime);
+  return {
+    "hours": hours,
+    "minutes": minutes,
+    "seconds": seconds
+  };
 } // Styling for the LineString
 
 
@@ -94880,7 +94897,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54109" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52314" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
