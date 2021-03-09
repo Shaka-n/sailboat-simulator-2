@@ -94780,13 +94780,16 @@ function viewSavedRouteTravelTime(routeId) {
     headers: headers
   }).then(function (response) {
     return response.json();
-  }).then(function (totalTravelTime) {
-    console.log(totalTravelTime);
+  }).then(function (timeAndDistance) {
+    console.log(timeAndDistance);
+    var time = timeAndDistance["time"];
+    var distance = timeAndDistance["distance"];
     var travelTimeDisplay = document.querySelector("#travel-time__display");
-    var convertedTime = timeConversion(totalTravelTime);
+    var convertedTime = timeConversion(time);
     travelTimeDisplay.textContent = "".concat(convertedTime["hours"], " hours, ").concat(convertedTime["minutes"], " minutes, and ").concat(convertedTime["seconds"], " seconds");
   });
-} // Method for converting from decimal time to normal time
+} // ${convertedTime["minutes"]} minutes, and ${convertedTime["seconds"]} seconds
+// Method for converting from decimal time to normal time
 
 
 function timeConversion(num) {
@@ -94796,6 +94799,19 @@ function timeConversion(num) {
   var minutes = Math.floor(decimalTime / 60);
   decimalTime = decimalTime - minutes * 60;
   var seconds = Math.round(decimalTime);
+
+  if (hours < 10) {
+    hours = "0" + hours;
+  }
+
+  if (minutes < 10) {
+    minutes = "0" + minutes;
+  }
+
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+
   return {
     "hours": hours,
     "minutes": minutes,
@@ -94901,7 +94917,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61954" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62780" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

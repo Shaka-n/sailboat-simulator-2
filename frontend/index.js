@@ -217,23 +217,37 @@ function viewSavedRouteTravelTime(routeId){
     headers: headers
   })
   .then(response => response.json())
-  .then(totalTravelTime => {
-    console.log(totalTravelTime)
+  .then(timeAndDistance => {
+    console.log(timeAndDistance)
+    const time = timeAndDistance["time"]
+    const distance = timeAndDistance["distance"]
     const travelTimeDisplay = document.querySelector("#travel-time__display")
-    const convertedTime = timeConversion(totalTravelTime)
+    const convertedTime = timeConversion(time)
     travelTimeDisplay.textContent = `${convertedTime["hours"]} hours, ${convertedTime["minutes"]} minutes, and ${convertedTime["seconds"]} seconds`
   })
 }
+// ${convertedTime["minutes"]} minutes, and ${convertedTime["seconds"]} seconds
 
 // Method for converting from decimal time to normal time
 
 function timeConversion(num){
-  let decimalTime = num * 60 * 60
-  const hours = Math.floor((decimalTime / (60 * 60)))
-  decimalTime - (hours * 60 * 60)
-  const minutes = Math.floor((decimalTime / 60))
-  decimalTime = decimalTime - (minutes * 60)
-  const seconds = Math.round(decimalTime)
+    let decimalTime = num * 60 * 60
+    let hours = Math.floor((decimalTime / (60 * 60)))
+    decimalTime - (hours * 60 * 60)
+    let minutes = Math.floor((decimalTime / 60))
+    decimalTime = decimalTime - (minutes * 60)
+    let seconds = Math.round(decimalTime)
+    if(hours < 10){
+      hours = "0" + hours
+    }
+    if(minutes < 10)
+    {
+	    minutes = "0" + minutes
+    }
+    if(seconds < 10)
+    {
+	    seconds = "0" + seconds
+    }
 
   return {"hours": hours, "minutes": minutes, "seconds": seconds}
 }
