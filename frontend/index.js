@@ -64,8 +64,8 @@ const map = new Map({
         vector
     ],
     view: new View({
-        center: fromLonLat([-70.74, 41.82]),
-        zoom: 8
+        center: fromLonLat([-70.0674, 41.7494]),
+        zoom: 9
     })
 });
 
@@ -153,12 +153,15 @@ function postCoordinates(coordinatesInt, routeName){
     })
   })
   .then(response => response.json())
-  .then(totalTravelTime => {
-    console.log(totalTravelTime)
+  .then(timeAndDistance => {
+    console.log(timeAndDistance)
+    const time = timeAndDistance["time"]
+    const distance = timeAndDistance["distance"]
     const travelTimeDisplay = document.querySelector("#travel-time__display")
-    const convertedTime = timeConversion(totalTravelTime)
+    const convertedTime = timeConversion(time)
     travelTimeDisplay.textContent = `${convertedTime["hours"]} hours, ${convertedTime["minutes"]} minutes, and ${convertedTime["seconds"]} seconds`
-
+    const distanceDisplay = document.querySelector("#distance__display")
+    distanceDisplay.textContent=`${distance} miles`
   })
 }
 // This function loads the saved routes and loads them into the DOM

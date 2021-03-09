@@ -74,6 +74,7 @@ class Route < ApplicationRecord
     def total_travel_time
         coordinates = JSON.parse(self.coordinates)
         sum_travel_time = 0
+        total_distance = 0
         array = []
         coordinates.each_with_index do |coordinate_pair, index| 
             array << Concurrent::Promises.future(coordinate_pair) do |coordinate_pair|
@@ -85,6 +86,7 @@ class Route < ApplicationRecord
             next_coordinate = coordinates[index+1]
             if next_coordinate != nil
                 distance = Haversine.distance(coordinate[0], coordinate[1], next_coordinate[0], next_coordinate[1]).to_miles
+                total_distance += distance
                 wind = array[index].value
                 adjusted_wind_angle = heading(wind["wind_direction"]) - boat_heading(coordinate, next_coordinate)
                 boat = Boat.new(adjusted_wind_angle.abs, wind["wind_speed"])
@@ -95,5 +97,6 @@ class Route < ApplicationRecord
             end
         end
         sum_travel_time
+        time_and_distance = {"time": sum_travel_time, "distance": total_distance}
     end
 end

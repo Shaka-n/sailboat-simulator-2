@@ -94626,8 +94626,8 @@ var map = new _ol2.Map({
   target: 'map',
   layers: [raster, vector],
   view: new _ol2.View({
-    center: (0, _proj.fromLonLat)([-70.74, 41.82]),
-    zoom: 8
+    center: (0, _proj.fromLonLat)([-70.0674, 41.7494]),
+    zoom: 9
   })
 }); // This the interactive line element that gets added to the map
 // ************************************************************
@@ -94716,11 +94716,15 @@ function postCoordinates(coordinatesInt, routeName) {
     })
   }).then(function (response) {
     return response.json();
-  }).then(function (totalTravelTime) {
-    console.log(totalTravelTime);
+  }).then(function (timeAndDistance) {
+    console.log(timeAndDistance);
+    var time = timeAndDistance["time"];
+    var distance = timeAndDistance["distance"];
     var travelTimeDisplay = document.querySelector("#travel-time__display");
-    var convertedTime = timeConversion(totalTravelTime);
+    var convertedTime = timeConversion(time);
     travelTimeDisplay.textContent = "".concat(convertedTime["hours"], " hours, ").concat(convertedTime["minutes"], " minutes, and ").concat(convertedTime["seconds"], " seconds");
+    var distanceDisplay = document.querySelector("#distance__display");
+    distanceDisplay.textContent = "".concat(distance, " miles");
   });
 } // This function loads the saved routes and loads them into the DOM
 // ****************************************************************
@@ -94897,7 +94901,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52314" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61954" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

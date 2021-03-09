@@ -20,11 +20,12 @@ class RoutesController < ApplicationController
     def create
         route = Route.create!(user_id: params[:user_id], coordinates: params[:coordinates], name: params[:name])
         # byebug
-        total_travel_time = route.total_travel_time
-        puts "Total Travel Time"
-        puts total_travel_time
+        total_travel_time_and_distance = route.total_travel_time
+        puts "Total Travel Time and Distance"
+        puts total_travel_time_and_distance["time"]
+        puts total_travel_time_and_distance["distance"]
         # byebug
-        render json: total_travel_time
+        render json: total_travel_time_and_distance
     end
 
     private
